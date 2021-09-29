@@ -41,8 +41,19 @@ public:
         this->occidentary = occidentary;
     }
 
+    u32 getRadarShinyPatchAdvances() const
+    {
+        return radarShinyPatchAdvances;
+    }
+
+    void setRadarShinyPatchAdvances(u32 radarShinyPatchAdvances)
+    {
+        this->radarShinyPatchAdvances = radarShinyPatchAdvances;
+    }
+
 private:
     u32 occidentary;
+    u32 radarShinyPatchAdvances;
 };
 
 #endif // WILDSTATE4_HPP

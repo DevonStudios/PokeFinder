@@ -22,7 +22,7 @@
 
 #include <Core/Gen4/EncounterArea4.hpp>
 #include <Core/Parents/Searchers/WildSearcher.hpp>
-#include <Core/Parents/States/WildState.hpp>
+#include <Core/Gen4/States/WildState4.hpp>
 #include <Core/RNG/RNGCache.hpp>
 #include <mutex>
 
@@ -36,7 +36,7 @@ public:
     void setState(u32 minAdvance, u32 maxAdvance);
     void startSearch(const std::array<u8, 6> &min, const std::array<u8, 6> &max);
     void cancelSearch();
-    std::vector<WildState> getResults();
+    std::vector<WildState4> getResults();
     int getProgress() const;
 
 private:
@@ -51,23 +51,23 @@ private:
 
     bool searching;
     int progress;
-    std::vector<WildState> results;
+    std::vector<WildState4> results;
     std::mutex mutex;
 
-    std::vector<WildState> search(u8 hp, u8 atk, u8 def, u8 spa, u8 spd, u8 spe) const;
-    std::vector<WildState> searchMethodJ(u8 hp, u8 atk, u8 def, u8 spa, u8 spd, u8 spe) const;
-    std::vector<WildState> searchMethodK(u8 hp, u8 atk, u8 def, u8 spa, u8 spd, u8 spe) const;
-    std::vector<WildState> searchChainedShiny(u8 hp, u8 atk, u8 def, u8 spa, u8 spd, u8 spe) const;
-    std::vector<WildState> searchInitialSeeds(const std::vector<WildState> &results) const;
+    std::vector<WildState4> search(u8 hp, u8 atk, u8 def, u8 spa, u8 spd, u8 spe) const;
+    std::vector<WildState4> searchMethodJ(u8 hp, u8 atk, u8 def, u8 spa, u8 spd, u8 spe) const;
+    std::vector<WildState4> searchMethodK(u8 hp, u8 atk, u8 def, u8 spa, u8 spd, u8 spe) const;
+    std::vector<WildState4> searchChainedShiny(u8 hp, u8 atk, u8 def, u8 spa, u8 spd, u8 spe) const;
+    std::vector<WildState4> searchInitialSeeds(const std::vector<WildState4> &results) const;
 
-    std::vector<WildState> normalMethodJ(WildState state, u32 seed) const;
-    std::vector<WildState> synchMethodJ(WildState state, u32 seed) const;
-    std::vector<WildState> cuteCharmMethodJ(WildState state, u32 seed) const;
-    bool encounterMethodJ(WildState &state, u32 seed) const;
-    std::vector<WildState> normalMethodK(WildState state, u32 seed) const;
-    std::vector<WildState> synchMethodK(WildState state, u32 seed) const;
-    std::vector<WildState> cuteCharmMethodK(WildState state, u32 seed) const;
-    bool encounterMethodK(WildState &state, u32 seed) const;
+    std::vector<WildState4> normalMethodJ(WildState4 state, u32 seed) const;
+    std::vector<WildState4> synchMethodJ(WildState4 state, u32 seed) const;
+    std::vector<WildState4> cuteCharmMethodJ(WildState4 state, u32 seed) const;
+    bool encounterMethodJ(WildState4 &state, u32 seed) const;
+    std::vector<WildState4> normalMethodK(WildState4 state, u32 seed) const;
+    std::vector<WildState4> synchMethodK(WildState4 state, u32 seed) const;
+    std::vector<WildState4> cuteCharmMethodK(WildState4 state, u32 seed) const;
+    bool encounterMethodK(WildState4 &state, u32 seed) const;
 };
 
 #endif // WILDSEARCHER4_HPP

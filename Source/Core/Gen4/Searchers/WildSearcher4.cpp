@@ -94,7 +94,7 @@ void WildSearcher4::cancelSearch()
     searching = false;
 }
 
-std::vector<WildState> WildSearcher4::getResults()
+std::vector<WildState4> WildSearcher4::getResults()
 {
     std::lock_guard<std::mutex> guard(mutex);
     auto data = std::move(results);
@@ -106,9 +106,9 @@ int WildSearcher4::getProgress() const
     return progress;
 }
 
-std::vector<WildState> WildSearcher4::search(u8 hp, u8 atk, u8 def, u8 spa, u8 spd, u8 spe) const
+std::vector<WildState4> WildSearcher4::search(u8 hp, u8 atk, u8 def, u8 spa, u8 spd, u8 spe) const
 {
-    std::vector<WildState> states;
+    std::vector<WildState4> states;
 
     if (method == Method::MethodJ)
     {
@@ -126,11 +126,11 @@ std::vector<WildState> WildSearcher4::search(u8 hp, u8 atk, u8 def, u8 spa, u8 s
     return searchInitialSeeds(states);
 }
 
-std::vector<WildState> WildSearcher4::searchMethodJ(u8 hp, u8 atk, u8 def, u8 spa, u8 spd, u8 spe) const
+std::vector<WildState4> WildSearcher4::searchMethodJ(u8 hp, u8 atk, u8 def, u8 spa, u8 spd, u8 spe) const
 {
-    std::vector<WildState> states;
+    std::vector<WildState4> states;
 
-    WildState state;
+    WildState4 state;
     state.setIVs(hp, atk, def, spa, spd, spe);
     state.calculateHiddenPower();
 
@@ -204,11 +204,11 @@ std::vector<WildState> WildSearcher4::searchMethodJ(u8 hp, u8 atk, u8 def, u8 sp
     return states;
 }
 
-std::vector<WildState> WildSearcher4::searchMethodK(u8 hp, u8 atk, u8 def, u8 spa, u8 spd, u8 spe) const
+std::vector<WildState4> WildSearcher4::searchMethodK(u8 hp, u8 atk, u8 def, u8 spa, u8 spd, u8 spe) const
 {
-    std::vector<WildState> states;
+    std::vector<WildState4> states;
 
-    WildState state;
+    WildState4 state;
     state.setIVs(hp, atk, def, spa, spd, spe);
     state.calculateHiddenPower();
 
@@ -282,11 +282,11 @@ std::vector<WildState> WildSearcher4::searchMethodK(u8 hp, u8 atk, u8 def, u8 sp
     return states;
 }
 
-std::vector<WildState> WildSearcher4::searchChainedShiny(u8 hp, u8 atk, u8 def, u8 spa, u8 spd, u8 spe) const
+std::vector<WildState4> WildSearcher4::searchChainedShiny(u8 hp, u8 atk, u8 def, u8 spa, u8 spd, u8 spe) const
 {
-    std::vector<WildState> states;
+    std::vector<WildState4> states;
 
-    WildState state;
+    WildState4 state;
     state.setIVs(hp, atk, def, spa, spd, spe);
     state.calculateHiddenPower();
 
@@ -330,11 +330,11 @@ std::vector<WildState> WildSearcher4::searchChainedShiny(u8 hp, u8 atk, u8 def, 
     return states;
 }
 
-std::vector<WildState> WildSearcher4::searchInitialSeeds(const std::vector<WildState> &results) const
+std::vector<WildState4> WildSearcher4::searchInitialSeeds(const std::vector<WildState4> &results) const
 {
-    std::vector<WildState> states;
+    std::vector<WildState4> states;
 
-    for (WildState result : results)
+    for (WildState4 result : results)
     {
         PokeRNGR rng(result.getSeed());
         rng.advance(minAdvance);
@@ -351,6 +351,24 @@ std::vector<WildState> WildSearcher4::searchInitialSeeds(const std::vector<WildS
             {
                 result.setSeed(test);
                 result.setAdvances(cnt);
+
+                if (method == Method::ChainedShiny)
+                {
+                    PokeRNG radar(test);
+                    u16 radarShinyPatch = radar.getSeed() >> 16;
+                    u32 radarShinyPatchAdvances = 0;
+                    while (radarShinyPatch > 0x8)
+                    {
+                        radarShinyPatch = radar.nextUShort();
+                        radarShinyPatchAdvances++;
+                    }
+                    if (radarShinyPatchAdvances >= cnt + 10)
+                    {
+                        radarShinyPatchAdvances = 0;
+                    }
+                    result.setRadarShinyPatchAdvances(radarShinyPatchAdvances);
+                }
+
                 states.emplace_back(result);
             }
 
@@ -361,9 +379,9 @@ std::vector<WildState> WildSearcher4::searchInitialSeeds(const std::vector<WildS
     return states;
 }
 
-std::vector<WildState> WildSearcher4::normalMethodJ(WildState state, u32 seed) const
+std::vector<WildState4> WildSearcher4::normalMethodJ(WildState4 state, u32 seed) const
 {
-    std::vector<WildState> states;
+    std::vector<WildState4> states;
     state.setLead(Lead::None);
 
     PokeRNGR rng(seed);
@@ -389,9 +407,9 @@ std::vector<WildState> WildSearcher4::normalMethodJ(WildState state, u32 seed) c
     return states;
 }
 
-std::vector<WildState> WildSearcher4::synchMethodJ(WildState state, u32 seed) const
+std::vector<WildState4> WildSearcher4::synchMethodJ(WildState4 state, u32 seed) const
 {
-    std::vector<WildState> states;
+    std::vector<WildState4> states;
     state.setLead(Lead::Synchronize);
 
     PokeRNGR rng(seed);
@@ -424,9 +442,9 @@ std::vector<WildState> WildSearcher4::synchMethodJ(WildState state, u32 seed) co
     return states;
 }
 
-std::vector<WildState> WildSearcher4::cuteCharmMethodJ(WildState state, u32 seed) const
+std::vector<WildState4> WildSearcher4::cuteCharmMethodJ(WildState4 state, u32 seed) const
 {
-    std::vector<WildState> states;
+    std::vector<WildState4> states;
 
     PokeRNGR rng(seed);
     u16 high = state.getPID() >> 16;
@@ -479,7 +497,7 @@ std::vector<WildState> WildSearcher4::cuteCharmMethodJ(WildState state, u32 seed
     return states;
 }
 
-bool WildSearcher4::encounterMethodJ(WildState &state, u32 seed) const
+bool WildSearcher4::encounterMethodJ(WildState4 &state, u32 seed) const
 {
     PokeRNGR rng(seed);
 
@@ -519,9 +537,9 @@ bool WildSearcher4::encounterMethodJ(WildState &state, u32 seed) const
     return filter.compareEncounterSlot(state);
 }
 
-std::vector<WildState> WildSearcher4::normalMethodK(WildState state, u32 seed) const
+std::vector<WildState4> WildSearcher4::normalMethodK(WildState4 state, u32 seed) const
 {
-    std::vector<WildState> states;
+    std::vector<WildState4> states;
 
     PokeRNGR rng(seed);
     u32 pid;
@@ -547,9 +565,9 @@ std::vector<WildState> WildSearcher4::normalMethodK(WildState state, u32 seed) c
     return states;
 }
 
-std::vector<WildState> WildSearcher4::synchMethodK(WildState state, u32 seed) const
+std::vector<WildState4> WildSearcher4::synchMethodK(WildState4 state, u32 seed) const
 {
-    std::vector<WildState> states;
+    std::vector<WildState4> states;
     state.setLead(Lead::Synchronize);
 
     PokeRNGR rng(seed);
@@ -582,9 +600,9 @@ std::vector<WildState> WildSearcher4::synchMethodK(WildState state, u32 seed) co
     return states;
 }
 
-std::vector<WildState> WildSearcher4::cuteCharmMethodK(WildState state, u32 seed) const
+std::vector<WildState4> WildSearcher4::cuteCharmMethodK(WildState4 state, u32 seed) const
 {
-    std::vector<WildState> states;
+    std::vector<WildState4> states;
 
     PokeRNGR rng(seed);
     u16 high = state.getPID() >> 16;
@@ -637,7 +655,7 @@ std::vector<WildState> WildSearcher4::cuteCharmMethodK(WildState state, u32 seed
     return states;
 }
 
-bool WildSearcher4::encounterMethodK(WildState &state, u32 seed) const
+bool WildSearcher4::encounterMethodK(WildState4 &state, u32 seed) const
 {
     PokeRNGR rng(seed);
 
